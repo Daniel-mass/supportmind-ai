@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environments
+venv/
+.env
+.env.*
+
+# Conda
+.conda/
+conda-meta/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+
+# Node
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# MLflow
+mlruns/
+
+# Docker
+docker-data/
+
+# Databases
+*.db
+
+# Secrets
+secrets/
+credentials/
