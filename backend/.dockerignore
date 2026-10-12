@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*.pyo
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+tests/
+*.log
+
+.env
+.env.*
+
+.ipynb_checkpoints/
+*.ipynb
+
+.git/
+.gitignore
+
+venv/
+.venv/
+env/
+
+# Training checkpoints — not required for inference
+app/nlp/ticket_category/training_checkpoints/
+app/nlp/conversation_intelligence/training_checkpoints/

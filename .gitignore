@@ -45,3 +45,25 @@ docker-data/
 # Secrets
 secrets/
 credentials/
+# SupportMind local data and generated artifacts
+.deepeval/
+mlartifacts/
+rawsupportminddata/
+backend/mlflow/
+
+# Local API snapshots and temporary request/response files
+backend/openapi-local.json
+organization.json
+organization-intelligence.json
+request.json
+response.json
+
+# Locally generated model training checkpoints
+backend/app/nlp/ticket_category/training_checkpoints/
+backend/app/nlp/conversation_intelligence/training_checkpoints/
+# Large trained models — keep outside the public Git repository
+backend/app/nlp/conversation_intelligence/models/supportmind_conversation_complexity/model.safetensors
+backend/app/nlp/priority_detection/priority_detection_model.joblib
+
+# Generated OpenAPI snapshot
+/openapi.json

@@ -1,0 +1,67 @@
+{
+  "evaluation": {
+    "framework": "DeepEval",
+    "evaluation_type": "graph_rag"
+  },
+  "model": {
+    "provider": "ollama",
+    "name": "qwen3:8b"
+  },
+  "input": {
+    "query": "What does the support data show about ticket priorities, statuses, workflow activity, and common operational delays?"
+  },
+  "output": {
+    "answer": "The support data indicates the following:  \n- **Ticket priorities**:  \n  - Medium priority accounts for 3,924 tickets [E6].  \n  - High priority has 2,254 tickets [E7].  \n  - Critical priority involves 2,129 tickets [E8].  \n  - Low priority includes 2,106 tickets [E9].  \n\n- **Ticket statuses**:  \n  - 2,881 tickets are in the \"Pending Customer Response\" status [E10].  \n\n- **Workflow activity and delays**:  \n  - No direct evidence about workflow activity or common operational delays is provided in the retrieved data.  \n\nThe available evidence does not specify details about workflow steps, delays, or broader operational metrics beyond priorities and statuses."
+  },
+  "retrieval": {
+    "context_count": 10,
+    "context": [
+      "my code does not show anything about this line, which is why i deleted it here.",
+      "what about my [placeholder] files?",
+      "not sure about what this product covers?",
+      "what does it mean?, ticket status: open, ticket priority: high, ticket channel: email\nticket id: 111, customer name: brent smith, customer email: bsummers@example.net, customer age: 60, customer gender: female, product purchased: amazon echo, date of purchase: 2021-07-28, ticket type: cancellation request, ticket subject: peripheral compatibility, ticket description: i've accidentally deleted important data from my amazon echo.",
+      "(beware when i accidentally add a link to your product and the item you selected incorrectly, you may see some data about missing items and it may require this problem started occurring after the recent software update.",
+      "Priority distribution: Medium = 3924 tickets.",
+      "Priority distribution: High = 2254 tickets.",
+      "Priority distribution: Critical = 2129 tickets.",
+      "Priority distribution: Low = 2106 tickets.",
+      "Status distribution: Pending Customer Response = 2881 tickets."
+    ]
+  },
+  "grounding": {
+    "status": "grounded",
+    "valid": true,
+    "cited_evidence_ids": [
+      "E6",
+      "E7",
+      "E8",
+      "E9",
+      "E10"
+    ]
+  },
+  "metrics": {
+    "faithfulness": {
+      "score": 1.0,
+      "threshold": 0.7,
+      "success": true,
+      "reason": "The score is 1.00 because there are no contradictions, indicating the actual output is fully aligned with the retrieval context."
+    },
+    "answer_relevancy": {
+      "score": 1.0,
+      "threshold": 0.7,
+      "success": true,
+      "reason": "The score is 1.00 because the answer directly addresses all aspects of the input query about ticket priorities, statuses, workflow activity, and operational delays without any irrelevant information. The response is comprehensive, focused, and perfectly aligned with the request, making it maximally relevant."
+    }
+  },
+  "metadata": {
+    "qdrant_collection": "supportmind_customer_tickets_test",
+    "model": "qwen3:8b",
+    "provider": "ollama",
+    "top_k": 5,
+    "reranking": false,
+    "metrics_evaluated": [
+      "faithfulness",
+      "answer_relevancy"
+    ]
+  }
+}

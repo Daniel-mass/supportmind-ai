@@ -1,0 +1,64 @@
+replicaCount: 1
+
+image:
+  repository: supportmind-ai-supportmind-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 3Gi
+
+probes:
+  startup:
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 90
+
+  liveness:
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readiness:
+    path: /openapi.json
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+secret:
+  existingSecret: supportmind-api-secret
+
+config:
+  OLLAMA_HOST: http://host.minikube.internal:11434
+  SUPPORTMIND_LLM_MODEL: qwen3:8b
+  SUPPORTMIND_GRAPH_RAG_MODEL: qwen3:8b
+
+  PHOENIX_COLLECTOR_ENDPOINT: http://host.minikube.internal:6006/v1/traces
+  MLFLOW_TRACKING_URI: http://host.minikube.internal:5000
+
+  QDRANT_URL: http://host.minikube.internal:6333
+  QDRANT_HOST: host.minikube.internal
+  QDRANT_PORT: "6333"
+  QDRANT_HTTPS: "false"
+
+  NEO4J_URI: bolt://host.minikube.internal:7687
+  NEO4J_USERNAME: neo4j
+  NEO4J_DATABASE: neo4j
+
+  SUPPORTMIND_ISSUES_CSV: /data/rawsupportminddata/Help Desk Tickets/Help Desk Tickets/issues.csv
+  SUPPORTMIND_CHANGE_HISTORY_CSV: /data/rawsupportminddata/Help Desk Tickets/Help Desk Tickets/issues_change_history.csv
+
+rawData:
+  hostPath: /data/rawsupportminddata
+  containerPath: /data/rawsupportminddata
+  readOnly: true

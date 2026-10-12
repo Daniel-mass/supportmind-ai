@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: supportmind-api
+  namespace: supportmind
+
+spec:
+  strategy:
+    type: Recreate
+
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: supportmind-api
+
+  template:
+    metadata:
+      labels:
+        app: supportmind-api
+
+    spec:
+      containers:
+        - name: supportmind-api
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          envFrom:
+            - configMapRef:
+                name: supportmind-api-config
+
+            - secretRef:
+                name: {{ .Values.secret.existingSecret }}
+
+          ports:
+            - containerPort: 8000
+
+          startupProbe:
+            tcpSocket:
+              port: 8000
+            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.startup.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
+
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path }}
+              port: 8000
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu | quote }}
+              memory: {{ .Values.resources.requests.memory | quote }}
+
+            limits:
+              cpu: {{ .Values.resources.limits.cpu | quote }}
+              memory: {{ .Values.resources.limits.memory | quote }}
+
+          volumeMounts:
+            - name: supportmind-raw-data
+              mountPath: {{ .Values.rawData.containerPath }}
+              readOnly: {{ .Values.rawData.readOnly }}
+
+      volumes:
+        - name: supportmind-raw-data
+          hostPath:
+            path: {{ .Values.rawData.hostPath }}
+            type: Directory

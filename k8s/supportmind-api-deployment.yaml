@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: supportmind-api
+  namespace: supportmind
+
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: supportmind-api
+
+  template:
+    metadata:
+      labels:
+        app: supportmind-api
+
+    spec:
+      containers:
+        - name: supportmind-api
+          image: supportmind-ai-supportmind-api:latest
+          imagePullPolicy: IfNotPresent
+
+          envFrom:
+            - configMapRef:
+                name: supportmind-api-config
+            - secretRef:
+                name: supportmind-api-secret
+
+          ports:
+            - containerPort: 8000
+
+          startupProbe:
+            tcpSocket:
+              port: 8000
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 90
+
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /openapi.json
+              port: 8000
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "3Gi"
+
+          volumeMounts:
+            - name: supportmind-raw-data
+              mountPath: /data/rawsupportminddata
+              readOnly: true
+
+      volumes:
+        - name: supportmind-raw-data
+          hostPath:
+            path: /data/rawsupportminddata
+            type: Directory

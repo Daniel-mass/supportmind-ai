@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: supportmind-api-config
+  namespace: supportmind
+
+data:
+  OLLAMA_HOST: {{ .Values.config.OLLAMA_HOST | quote }}
+  SUPPORTMIND_LLM_MODEL: {{ .Values.config.SUPPORTMIND_LLM_MODEL | quote }}
+  SUPPORTMIND_GRAPH_RAG_MODEL: {{ .Values.config.SUPPORTMIND_GRAPH_RAG_MODEL | quote }}
+
+  PHOENIX_COLLECTOR_ENDPOINT: {{ .Values.config.PHOENIX_COLLECTOR_ENDPOINT | quote }}
+  MLFLOW_TRACKING_URI: {{ .Values.config.MLFLOW_TRACKING_URI | quote }}
+
+  QDRANT_URL: {{ .Values.config.QDRANT_URL | quote }}
+  QDRANT_HOST: {{ .Values.config.QDRANT_HOST | quote }}
+  QDRANT_PORT: {{ .Values.config.QDRANT_PORT | quote }}
+  QDRANT_HTTPS: {{ .Values.config.QDRANT_HTTPS | quote }}
+
+  NEO4J_URI: {{ .Values.config.NEO4J_URI | quote }}
+  NEO4J_USERNAME: {{ .Values.config.NEO4J_USERNAME | quote }}
+  NEO4J_DATABASE: {{ .Values.config.NEO4J_DATABASE | quote }}
+
+  SUPPORTMIND_ISSUES_CSV: {{ .Values.config.SUPPORTMIND_ISSUES_CSV | quote }}
+  SUPPORTMIND_CHANGE_HISTORY_CSV: {{ .Values.config.SUPPORTMIND_CHANGE_HISTORY_CSV | quote }}
