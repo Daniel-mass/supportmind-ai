@@ -1,155 +1,121 @@
 # SupportMind AI
 ### Enterprise Customer & Issue Intelligence Platform
 
-**SupportMind AI** is an AI-powered customer-support and issue-intelligence platform that transforms historical support data, organizational knowledge, and operational workflows into actionable insights.
+SupportMind AI transforms fragmented customer-support data into actionable intelligence. It combines NLP and machine learning, hybrid retrieval, knowledge graphs, Graph-RAG, agentic AI, and operational analytics in a single platform.
 
-Rather than functioning only as a chatbot, SupportMind combines NLP/ML, hybrid retrieval, knowledge graphs, Graph-RAG, multi-agent orchestration, deterministic operational analytics, and evaluation/observability to support both customer assistance and enterprise issue analysis.
+Rather than treating customer support as a question-and-answer chatbot, SupportMind connects historical tickets, organizational knowledge, workflow events, and AI-assisted reasoning to help support teams understand issues, retrieve relevant evidence, recommend resolutions, and discover operational patterns.
 
-> **Core principle:** Ground AI-generated assistance in retrieved evidence, preserve provenance, validate outputs, and use structured operational data to understand how support work actually flows.
+**Repository:** [Daniel-mass/supportmind-ai](https://github.com/Daniel-mass/supportmind-ai)
 
 ---
 
 ## Table of Contents
 
-- [Why SupportMind?](#why-supportmind)
+- [Overview](#overview)
 - [Key Capabilities](#key-capabilities)
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
-- [NLP and Machine Learning](#nlp-and-machine-learning)
+- [Machine Learning and NLP](#machine-learning-and-nlp)
 - [Retrieval and Graph-RAG](#retrieval-and-graph-rag)
-- [Operational Intelligence](#operational-intelligence)
 - [Agentic AI](#agentic-ai)
+- [Operational Intelligence](#operational-intelligence)
 - [Evaluation and Observability](#evaluation-and-observability)
-- [Frontend Dashboard](#frontend-dashboard)
-- [API Overview](#api-overview)
-- [Project Structure](#project-structure)
-- [Run Locally](#run-locally)
-- [Containerization and Deployment](#containerization-and-deployment)
-- [CI with GitHub Actions](#ci-with-github-actions)
-- [Datasets and Knowledge Sources](#datasets-and-knowledge-sources)
-- [Engineering Decisions](#engineering-decisions)
+- [Frontend](#frontend)
+- [API Reference](#api-reference)
+- [Deployment and CI](#deployment-and-ci)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Data and Model Artifacts](#data-and-model-artifacts)
+- [Engineering Principles](#engineering-principles)
 - [Limitations and Scope](#limitations-and-scope)
-- [Future Directions](#future-directions)
+- [Roadmap](#roadmap)
 
 ---
 
-## Why SupportMind?
+## Overview
 
-Customer-support organizations accumulate information across tickets, knowledge articles, historical resolutions, and operational workflows. When this information remains fragmented, teams struggle to retrieve relevant evidence, identify recurring problems, and understand process bottlenecks.
+Customer-support organizations generate large volumes of tickets, documents, workflow events, and historical resolutions. These signals are often fragmented across systems, making it difficult to retrieve relevant knowledge, identify recurring issues, and understand operational inefficiencies.
 
-SupportMind addresses these challenges through a unified intelligence layer.
+SupportMind AI addresses this problem through an integrated intelligence pipeline:
 
-| Challenge | SupportMind approach |
-|---|---|
-| Manual ticket triage | ML-based ticket category and priority predictions |
-| Repeated support issues | Semantic retrieval and historical issue discovery |
-| Fragmented knowledge | Document ingestion, embeddings, and vector search |
-| Relationships hidden in text | Neo4j knowledge graphs and graph retrieval |
-| Unsupported AI responses | Evidence provenance, citation checks, and groundedness validation |
-| Complex support workflows | AutoGen orchestration and agent-level tracing |
-| Limited operational visibility | Ticket, agent, team, workflow, and organization analytics |
-| Difficult model evaluation | DeepEval and MLflow |
-| Difficult debugging of agent execution | Phoenix and OpenTelemetry |
+**Collect → Understand → Retrieve → Reason → Recommend → Evaluate → Discover**
+
+The platform combines two complementary forms of intelligence:
+
+- **Customer-support intelligence:** ticket classification, priority detection, semantic retrieval, evidence-grounded assistance, and AI agent workflows.
+- **Organizational intelligence:** ticket and agent analytics, workflow bottlenecks, handoff analysis, workflow variants, emerging issues, and graph-based exploration.
+
+The project uses public development datasets and a synthetic company knowledge base to demonstrate these capabilities without requiring access to a real organization's private customer data.
 
 ## Key Capabilities
 
-### 1. Data ingestion and knowledge preparation
-
-- Modular loaders for supported file formats, including PDF, DOCX, TXT, CSV, JSON, and ticket/email data.
-- Parsing, text normalization, preprocessing, and metadata handling.
-- Configurable chunking strategies, including recursive and semantic approaches, plus CSV row chunking.
-- Embedding providers and vector-store registries.
-- Qdrant integration for vector storage and retrieval.
-- A synthetic NovaCare Technologies knowledge base for development and demonstration.
-
-### 2. NLP and machine learning
-
-- Ticket-category classification.
-- Priority prediction.
-- Conversation-complexity classification.
-- Semantic similarity and historical-ticket retrieval.
-- BERTopic-based discovery of recurring issues in historical tickets.
-- Sentiment as a supporting signal where available.
-
-### 3. Retrieval and knowledge graphs
-
-- Dense vector retrieval.
-- Sparse retrieval using BM25.
-- Hybrid retrieval combining dense and sparse results.
-- Reciprocal Rank Fusion (RRF).
-- Candidate deduplication and reranking.
-- ColBERT late-interaction reranking and a Cross-Encoder baseline.
-- Neo4j-backed retrieval graphs and operational relationship graphs.
-- Graph-RAG evidence retrieval and fusion.
-
-### 4. Enterprise intelligence
-
-- Ticket intelligence.
-- Agent and team analytics.
-- Workflow metrics and lifecycle analysis.
-- Agent handoff analysis.
-- Workflow variant discovery.
-- Bottleneck analysis.
-- Organization-level operational insights and emerging-issue analysis.
-- Evidence records with provenance for supported intelligence responses.
-
-### 5. AI-powered support
-
-The Support Assist workflow brings together classification signals, retrieval, Graph-RAG, agent orchestration, evidence validation, and response composition through a unified API.
-
-The system is designed to provide grounded assistance rather than treat a language model's unsupported output as authoritative.
+- **NLP and machine learning:** ticket-category classification, priority detection, conversation-complexity modelling, semantic similarity, and unsupervised topic discovery.
+- **Hybrid retrieval:** dense vector search combined with BM25 sparse retrieval, Reciprocal Rank Fusion (RRF), and reranking.
+- **Knowledge graphs:** Neo4j-based retrieval relationships and structured operational workflow graphs.
+- **Graph-RAG:** combines graph and vector evidence with provenance preservation, evidence ranking, citation checks, and groundedness validation.
+- **Agentic support:** AutoGen-based orchestration for classification, retrieval, resolution, escalation, and response composition.
+- **Operational analytics:** ticket, agent, team, organization, workflow, handoff, and bottleneck intelligence.
+- **AI evaluation:** DeepEval integration and evaluation-result reporting.
+- **Observability and MLOps:** Phoenix tracing and MLflow experiment/evaluation tracking.
+- **Enterprise-style dashboard:** a Next.js interface for support assistance, intelligence dashboards, evaluations, and observability.
+- **Containerization and orchestration:** Docker, Docker Compose, Kubernetes, Minikube, and Helm.
+- **Continuous integration:** GitHub Actions for automated repository checks and container builds.
 
 ---
 
 ## Architecture
 
-```text
-                 SUPPORT DATA & KNOWLEDGE
-        Tickets | Documents | Historical Records
-                         |
-                         v
-                  INGESTION LAYER
-          Loaders | Parsing | Normalization
-             Chunking | Embeddings
-                         |
-                         v
-                NLP / ML INTELLIGENCE
-       Category | Priority | Complexity
-        Semantic Similarity | BERTopic
-                         |
-             +-----------+-----------+
-             |                       |
-             v                       v
-       QDRANT VECTOR STORE      NEO4J GRAPH
-       Dense / BM25 / Hybrid    Relationships
-       Retrieval / Reranking   Graph Retrieval
-             |                       |
-             +-----------+-----------+
-                         |
-                         v
-                     GRAPH-RAG
-        Evidence Fusion | Provenance | Validation
-                         |
-                         v
-                 AUTOGEN AGENTS
-       Coordinator | Classification | Retrieval
-          Resolution | Escalation | Composition
-                         |
-                         v
-                  FASTAPI SERVICES
-       Support Assist | Intelligence | Evaluation
-                         |
-                         v
-                 NEXT.JS DASHBOARD
-       Support | Tickets | Agents | Workflows
-       Organization | Evaluation | Observability
+```mermaid
+flowchart TD
+    A[Support Tickets and Documents] --> B[Ingestion and Preprocessing]
+    B --> C[NLP and ML Intelligence]
+    B --> D[Embedding Pipeline]
 
-       PHOENIX  -> Agent execution tracing
-       DEEPEVAL -> LLM evaluation
-       MLFLOW   -> Experiment and metric tracking
+    D --> E[Qdrant Vector Store]
+    B --> F[Neo4j Knowledge Graph]
+
+    C --> G[FastAPI Intelligence Services]
+    E --> H[Hybrid Retrieval and Reranking]
+    F --> I[Graph Retrieval]
+
+    H --> J[Graph-RAG Evidence Fusion]
+    I --> J
+    G --> J
+
+    J --> K[AutoGen Agent Workflow]
+    K --> L[Grounded Support Response]
+    K --> M[Phoenix Tracing]
+
+    C --> N[MLflow Tracking]
+    K --> O[DeepEval Evaluation]
+    G --> P[Operational Analytics APIs]
+
+    L --> Q[Next.js Dashboard]
+    O --> Q
+    N --> Q
+    M --> Q
+    P --> Q
 ```
 
-**Architecture principle:** Retrieval, operational intelligence, generation, evaluation, and observability are separate concerns connected through defined interfaces. Qdrant, Neo4j, Ollama, and individual agents are internal components, not separate public SupportMind application APIs.
+### Main components
+
+| Component | Responsibility |
+|---|---|
+| Ingestion | Load, parse, normalize, preprocess, and chunk source data. |
+| NLP/ML | Produce ticket classifications, priority predictions, conversation-complexity signals, and topic assignments. |
+| Qdrant | Store and retrieve vector representations. |
+| Neo4j | Represent retrieval relationships and operational workflow graphs. |
+| Retrieval | Combine dense search, BM25, fusion, and reranking. |
+| Graph-RAG | Combine relevant evidence and generate grounded responses. |
+| AutoGen | Orchestrate support-assistance agents and workflow execution. |
+| Intelligence services | Calculate deterministic ticket, agent, workflow, and organization metrics. |
+| FastAPI | Expose application capabilities through HTTP endpoints. |
+| DeepEval | Evaluate configured LLM/RAG outputs. |
+| Phoenix | Trace agent execution and inspect workflow spans. |
+| MLflow | Track ML experiments, evaluation runs, parameters, metrics, and artifacts. |
+| Next.js | Present support assistance, analytics, evaluation, and observability interfaces. |
+
+Qdrant, Neo4j, Ollama, and individual agents are internal components rather than separate public SupportMind application APIs.
 
 ---
 
@@ -157,262 +123,219 @@ The system is designed to provide grounded assistance rather than treat a langua
 
 | Layer | Technologies |
 |---|---|
-| Frontend | Next.js App Router, TypeScript |
-| UI and styling | Tailwind CSS, shadcn |
-| Data fetching and state | TanStack Query, Zustand |
-| Visualization | Recharts, React Flow, Lucide |
-| Backend API | Python 3.11, FastAPI, Pydantic |
+| Frontend | Next.js, TypeScript, Tailwind CSS, shadcn |
+| State and data fetching | Zustand, TanStack Query |
+| Visualizations | Recharts, React Flow, Lucide |
+| Backend | Python 3.11, FastAPI, Pydantic |
 | NLP and ML | scikit-learn, Transformers, DistilBERT, BERTopic |
-| Embeddings | FastEmbed and provider-based embedding integrations |
+| Embeddings | FastEmbed and embedding-provider abstractions |
 | Vector database | Qdrant |
-| Graph database | Neo4j |
-| Retrieval | Dense search, BM25, hybrid retrieval, RRF, reranking |
-| LLM inference | Ollama with Qwen3:8b |
+| Knowledge graph | Neo4j |
+| Retrieval | Dense retrieval, BM25, RRF, ColBERT, Cross-Encoder baseline |
+| LLM inference | Ollama, Qwen3:8b |
 | Agent orchestration | AutoGen |
-| LLM evaluation | DeepEval |
-| Tracing and observability | Phoenix, OpenTelemetry |
+| Evaluation | DeepEval |
+| Observability | Phoenix, OpenTelemetry |
 | Experiment tracking | MLflow |
-| Containers | Docker, Docker Compose |
+| Containerization | Docker, Docker Compose |
 | Orchestration | Kubernetes, Minikube, Helm |
-| Continuous integration | GitHub Actions |
+| CI | GitHub Actions |
 
 ---
 
-## NLP and Machine Learning
+## Machine Learning and NLP
 
-SupportMind uses different datasets for different learning objectives rather than forcing every dataset into a single prediction pipeline.
+SupportMind uses different datasets and modelling strategies for different tasks rather than forcing every problem into a single model.
 
 | Capability | Approach | Purpose |
 |---|---|---|
-| Ticket-category classification | Word and character TF-IDF with class-balanced Logistic Regression | Predict a ticket category from subject and description |
-| Priority detection | ExtraTrees with class balancing and engineered ticket metadata | Predict ticket priority from information available at creation time |
-| Conversation complexity | DistilBERT classification pipeline | Predict single-turn versus multi-turn conversation complexity |
-| Semantic similarity | Embedding-based retrieval | Find semantically related historical support cases |
-| Issue discovery | BERTopic with BGE-base embeddings, UMAP, and HDBSCAN | Discover recurring themes without predefined class labels |
-| Sentiment | Supporting signal where available | Add context to support analysis |
+| Ticket-category classification | Word and character TF-IDF features with class-balanced Logistic Regression | Predict a category from ticket subject and description. |
+| Priority detection | Feature-engineered ExtraTrees classifier with class balancing | Estimate ticket priority from available, non-leaking features. |
+| Conversation complexity | DistilBERT classification task using customer conversation structure | Distinguish single-turn and multi-turn conversation patterns. |
+| Semantic similarity | Embeddings and vector retrieval | Find semantically related historical content. |
+| Issue discovery | BERTopic with BGE-base embeddings, UMAP, and HDBSCAN | Discover recurring issue clusters without requiring predefined labels. |
+| Sentiment | Available sentiment signals where applicable | Provide supporting context, not a universal sentiment-prediction guarantee. |
 
-### Selected model results
+### Topic modelling
 
-The following are results recorded during model development, not a claim that every model has been independently retrained in the current environment.
+The documented BERTopic experiment used 8,460 issue-bearing ticket documents and discovered 59 actual topics, with 1,379 documents assigned to the outlier cluster.
 
-| Model | Recorded evaluation |
-|---|---|
-| Ticket-category classifier | 77.55% accuracy, 69.02% macro-F1, 77.56% weighted-F1 on a 49-example test split |
-| Priority detector | 73.26% accuracy, 39.66% macro-F1, 76.35% weighted-F1 on a held-out split |
-| BERTopic | 8,460 documents, 59 discovered topics, 83.70% assigned to topics, 16.30% outliers |
-| BERTopic coherence | C_V coherence of 0.7972; topic diversity of 0.5983 |
+Reported experiment metrics:
 
-**Interpretation matters.** Priority detection has weaker performance on minority classes than on the dominant Medium class. The ticket-category evaluation set is small, and the source data is synthetic. BERTopic discovers clusters; it does not automatically establish business root causes.
+- Topic assignment coverage: **83.70%**
+- Outliers: **16.30%**
+- C_V coherence: **0.7972**
+- Topic diversity: **0.5983**
 
-The conversation-complexity documentation records a leakage-aware, text-grouped train/validation/test preparation pipeline and DistilBERT setup. Full training and final evaluation must be confirmed against the current model artifacts before reporting a final score.
+Topic IDs are model-generated clusters, not permanent business categories. Topic labels and possible explanations require appropriate interpretation.
 
-### Dataset-driven scope
+### Deliberate scope decisions
 
-The initial plan considered additional intent classification, named entity recognition, urgency models, escalation prediction, and other NLP tasks. These were removed from the supported ML roadmap when the available data did not justify reliable supervised implementations.
+Intent classification, named entity recognition (NER), ML-based urgency prediction, and ML-based escalation prediction were removed from the implemented ML scope because the available data did not justify presenting them as validated models.
 
-This avoids presenting unvalidated predictions as implemented intelligence.
+Conversation-complexity training and model-artifact availability must be checked against the current repository before assuming that a trained checkpoint is included in a fresh clone.
 
 ---
 
 ## Retrieval and Graph-RAG
 
-SupportMind combines complementary retrieval strategies to improve the relevance of evidence supplied to the AI workflow.
+SupportMind implements a retrieval pipeline designed to combine semantic relevance, lexical matching, graph relationships, and evidence provenance.
 
 ### Retrieval pipeline
 
-```text
-User Request
-     |
-     v
-Dense Retrieval (Qdrant) + Sparse Retrieval (BM25)
-     |
-     v
-Hybrid Fusion (RRF)
-     |
-     v
-Candidate Deduplication
-     |
-     v
-Reranking (ColBERT / Cross-Encoder baseline)
-     |
-     v
-Context Construction
-     |
-     v
-Evidence with Provenance
-```
+1. Load and preprocess source content.
+2. Create chunks and embeddings.
+3. Store vectors in Qdrant.
+4. Retrieve candidates using dense vector search and BM25.
+5. Combine ranked results using Reciprocal Rank Fusion.
+6. Deduplicate candidates and rerank them.
+7. Build a bounded context from selected evidence.
+8. Combine vector and graph evidence for Graph-RAG.
+9. Generate a response and validate citations and groundedness.
 
-### Graph-RAG
+### Retrieval components
 
-The Graph-RAG layer combines vector-retrieved evidence, graph-derived context, and operational intelligence through dedicated services.
+- **Dense retrieval:** semantic similarity through vector search.
+- **Sparse retrieval:** BM25 lexical matching.
+- **Hybrid retrieval:** combines dense and sparse candidates.
+- **RRF:** fuses independently ranked results.
+- **Reranking:** ColBERT-based reranking, with a Cross-Encoder baseline.
+- **Graph retrieval:** traverses relationships represented in Neo4j.
+- **Evidence handling:** retains provenance and supports citation validation.
 
-Implemented design elements include:
-
-- Typed request, context, evidence, and response models.
-- Vector and graph retrieval integration.
-- Evidence fusion, ranking, and context budgeting.
-- Provenance preservation.
-- Prompt construction and prompt-injection resistance measures.
-- Ollama-backed Qwen3:8b generation.
-- Citation and groundedness validation.
-- A dedicated Graph-RAG service and API.
-
-The purpose is to improve context and traceability. Graph-RAG does not guarantee that every generated statement is correct, so evaluation and validation remain essential.
-
----
-
-## Operational Intelligence
-
-SupportMind's intelligence layer converts raw support records and workflow history into structured analytics.
-
-### Workflow
-
-```text
-Raw Help Desk Data
-        |
-        v
-Canonical Ticket and Agent Schemas
-        |
-        v
-Workflow Event Construction
-        |
-        v
-Lifecycle / Waiting / Handoff Metrics
-        |
-        v
-Ticket, Agent, Team and Organization Analytics
-        |
-        v
-Intelligence APIs and Dashboard
-```
-
-Key capabilities include:
-
-- Canonical schemas for tickets, workflow events, agents, evidence, and overview data.
-- Ticket and agent analytics.
-- Workflow transition and lifecycle metrics.
-- Waiting-time analysis and bottleneck identification.
-- Agent handoff detection.
-- Workflow variant aggregation.
-- Operational graph construction and Neo4j querying.
-- Organization intelligence and emerging-issue analysis.
-
-The intelligence layer uses deterministic analytics where possible, keeping operational measurements separate from LLM-generated explanations. Bottlenecks and correlations should be interpreted as analytical signals, not automatic proof of causation.
+Graph-RAG is not simply a graph visualization or a synonym for ordinary RAG. It combines retrieved evidence from graph and vector sources before generation.
 
 ---
 
 ## Agentic AI
 
-SupportMind uses AutoGen to coordinate a multi-stage support-assistance workflow.
+The support-assistance workflow uses AutoGen orchestration and structured application models.
 
-```text
-Customer Request
-       |
-       v
-Coordinator / Orchestrator
-       |
-       v
-Classification Agent
-       |
-       v
-Retrieval Agent
-       |
-       v
-Resolution Agent
-       |
-       v
-Escalation Agent
-       |
-       v
-Response Composition
-       |
-       v
-Validated Support Response
+```mermaid
+flowchart TD
+    A[Customer Support Request] --> B[Coordinator]
+    B --> C[Classification]
+    C --> D[Retrieval]
+    D --> E[Evidence and Context]
+    E --> F[Resolution]
+    F --> G[Escalation Assessment]
+    G --> H[Response Composition]
+    H --> I[Validated Support Response]
+    B -. traces .-> J[Phoenix]
+    C -. traces .-> J
+    D -. traces .-> J
+    F -. traces .-> J
+    G -. traces .-> J
 ```
 
-The orchestration layer coordinates execution and manages structured state, intermediate results, evidence references, iteration handling, and error paths.
+### Agent responsibilities
 
-- **Classification:** uses available classification and intelligence signals.
-- **Retrieval:** obtains relevant evidence from retrieval services.
-- **Resolution:** prepares a structured recommendation grounded in supplied evidence.
-- **Escalation:** evaluates the need for human intervention.
-- **Response composition:** communicates the resulting assistance while preserving upstream decisions.
-- **Coordinator:** manages the workflow and final response.
+- **Coordinator:** manages the overall support workflow.
+- **Classification:** supplies available ticket and request classification signals.
+- **Retrieval:** retrieves relevant knowledge and historical evidence.
+- **Resolution:** proposes a resolution grounded in the supplied context.
+- **Escalation:** assesses whether additional human intervention is appropriate.
+- **Response composition:** communicates the upstream results in a clear response.
 
-Pydantic models and semantic validation help maintain structured outputs and verify evidence references. The architecture does not mean that every agent is an independently trained model or that every predicted field is ML-backed.
+Structured validation helps ensure that evidence references point to evidence actually supplied to the workflow. Grounding and citation checks reduce unsupported output, but do not guarantee that every generated statement is correct.
 
-A unified Support Assist API exposes the workflow rather than creating a separate public endpoint for each internal agent.
+The unified Support Assist endpoint is the application entry point; individual agents are internal workflow components.
+
+---
+
+## Operational Intelligence
+
+In addition to generated support responses, SupportMind provides deterministic analytics through its intelligence layer.
+
+### Ticket intelligence
+Structured ticket information and associated operational signals.
+
+### Agent and team intelligence
+Metrics and relationships derived from available ticket and workflow data.
+
+### Workflow intelligence
+- Lifecycle and waiting-time metrics.
+- Status transitions and workflow intervals.
+- Agent handoffs.
+- Bottleneck candidates.
+- Grouped workflow variants.
+
+### Organization intelligence
+Aggregated ticket, agent, team, and workflow analytics, including trends and emerging-issue views.
+
+The intelligence layer uses canonical schemas and dedicated services to separate analytics from presentation. FastAPI returns structured data; the Next.js frontend visualizes it.
+
+**Important:** bottlenecks and issue spikes are analytical signals, not proof of causal root causes. Claims such as a particular payment gateway being the root cause require supporting evidence.
 
 ---
 
 ## Evaluation and Observability
 
-SupportMind separates **answer-quality evaluation**, **execution tracing**, and **ML experiment tracking**.
+SupportMind separates evaluation, execution tracing, and experiment tracking.
 
-| Component | Responsibility |
+| System | Role |
 |---|---|
-| DeepEval | Evaluate LLM/RAG outputs using configured evaluation metrics |
-| Phoenix | Trace agent execution, spans, inputs/outputs, and workflow behavior |
-| OpenTelemetry | Provide instrumentation and trace transport |
-| MLflow | Track experiments, parameters, metrics, artifacts, and evaluation runs |
+| DeepEval | Evaluate configured LLM/RAG behaviour and present evaluation results. |
+| Phoenix | Inspect agent workflow traces, spans, inputs/outputs, and execution behaviour. |
+| MLflow | Track experiments, parameters, metrics, artifacts, and model/evaluation runs. |
 
-### DeepEval
+### Grounding and evidence validation
 
-The evaluation integration includes result loading, evaluation-related API routes, and dashboard integration. Results must be interpreted according to the actual evaluation dataset, metrics, and run configuration.
+The Graph-RAG workflow includes citation and groundedness checks. These are application-level safeguards and are distinct from benchmark-based evaluation.
 
 ### Phoenix
 
-Custom tracing records the support orchestration and agent workflow. This makes it easier to inspect the execution path and investigate failures or unexpected behavior.
+OpenTelemetry-based tracing captures the support workflow and agent execution. The Phoenix interface is used to inspect traces and diagnose execution behaviour.
 
 ### MLflow
 
-MLflow provides experiment and evaluation tracking. Its recorded local setup uses a SQLite backend and an artifact directory.
+MLflow uses a persistent tracking backend and artifact storage in the local development setup. The dashboard connects to the application's MLflow observability integration.
 
-These tools complement one another: Phoenix helps explain *what happened during execution*, DeepEval evaluates *the quality of outputs*, and MLflow records *experiments and their results*.
+### Evaluation scope
+
+DeepEval is the configured evaluation framework. RAGAS was removed from the agreed project scope; it should not be treated as an active evaluation dependency.
 
 ---
 
-## Frontend Dashboard
+## Frontend
 
-The Next.js application provides a centralized interface for interacting with the platform and inspecting its intelligence.
+The Next.js application acts as the platform's operational cockpit rather than just a chat window.
 
 The implemented dashboard structure includes:
 
-- **Overview:** platform-level operational summary.
+- **Overview:** platform-level operational summaries.
 - **AI Support:** unified support-assistance interface.
-- **Tickets:** ticket and ticket-intelligence views.
-- **Intelligence:** ticket, ML, knowledge/retrieval, and graph intelligence.
+- **Tickets:** ticket-related views.
+- **Intelligence:** ticket intelligence, ML intelligence, knowledge/retrieval, and graph intelligence.
 - **Agent Operations:** agent intelligence and workflow views.
 - **Organization:** trends, emerging issues, and operational insights.
-- **Evaluation:** configured evaluation results and related views.
+- **Evaluation:** evaluation results and model-related views.
 - **Observability:** Phoenix, MLflow, and system-health views.
 
-The dashboard consumes backend APIs and presents structured data through charts, tables, and graph-oriented visualizations.
-
-It should not be confused with a claim that all proposed customer, agent, manager, and administrator portals, authentication flows, or third-party connector-management screens have been implemented.
+The exact data shown in each view depends on its connected API and the availability of underlying datasets or artifacts. These dashboards should not be interpreted as evidence that every planned enterprise connector or customer portal has been implemented.
 
 ---
 
-## API Overview
+## API Reference
 
-FastAPI exposes the application's capabilities through versioned routes.
+FastAPI provides interactive API documentation when the backend is running.
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| GET | `/api/v1/health` | Application health |
-| POST | `/api/v1/support/assist` | Unified AI support workflow |
-| GET | `/api/v1/tickets/{ticket_id}/intelligence` | Ticket intelligence |
-| GET | `/api/v1/workflow/{ticket_id}/intelligence` | Workflow intelligence |
-| GET | `/api/v1/agents/{agent_id}/intelligence` | Agent intelligence |
-| GET | `/api/v1/organization/intelligence` | Organization intelligence |
-| POST | `/api/v1/graph-rag/query` | Graph-RAG query |
-| GET | `/api/graph-rag/health` | Graph-RAG health |
-| GET | `/api/v1/mlflow/health` | MLflow connectivity/status |
-| GET | `/docs` | Interactive FastAPI documentation |
+| GET | `/api/v1/health` | Application health. |
+| POST | `/api/v1/support/assist` | Unified AI support workflow. |
+| GET | `/api/v1/tickets/{ticket_id}/intelligence` | Ticket intelligence. |
+| GET | `/api/v1/workflow/{ticket_id}/intelligence` | Workflow intelligence. |
+| GET | `/api/v1/agents/{agent_id}/intelligence` | Agent intelligence. |
+| GET | `/api/v1/organization/intelligence` | Organization-level intelligence. |
+| POST | `/api/v1/graph-rag/query` | Graph-RAG query workflow. |
+| GET | `/api/graph-rag/health` | Graph-RAG health check. |
 
-Evaluation and other observability routes are also part of the application API surface. Consult the live OpenAPI specification for their exact current paths and request/response schemas.
+Evaluation and MLflow observability routes are also part of the application API surface. Consult the running OpenAPI specification for the exact current paths and request schemas.
 
-Example Support Assist request:
+### Example: Support Assist
+
+Request:
 
 ```http
 POST /api/v1/support/assist
@@ -425,63 +348,73 @@ Content-Type: application/json
 }
 ```
 
-The API accepts a single request string for this workflow; it should not be assumed to provide persistent conversational memory across requests.
+The response contains the support result and relevant workflow information according to the current API schema, including available evidence and intelligence data.
 
-**For the authoritative endpoint list, open `/docs` on the running backend.**
+### Interactive API documentation
+
+Once the backend is running, open:
+
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- OpenAPI schema: `http://127.0.0.1:8000/openapi.json`
 
 ---
 
-## Project Structure
+## Deployment and CI
 
-The following is a high-level guide to the principal areas of the repository. It is not intended to be an exhaustive file listing.
+### Docker
 
-```text
-supportmind-ai/
-├── backend/
-│   ├── app/
-│   │   ├── agents/                 # Agent orchestration
-│   │   ├── api/                    # Application routes
-│   │   ├── embeddings/              # Embedding providers and pipeline
-│   │   ├── evaluation/              # DeepEval and evaluation workflows
-│   │   ├── ingestion/               # Loaders, parsers, preprocessing, chunking
-│   │   ├── intelligence/            # Structured operational intelligence
-│   │   ├── nlp/                     # Classification and topic modeling
-│   │   ├── observability/            # Phoenix / MLflow integration
-│   │   ├── retrieval/               # Dense, sparse, hybrid, Graph-RAG
-│   │   └── vector_store/             # Qdrant integration
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   └── mlflow/                      # Local MLflow data/artifacts
-├── frontend/
-│   ├── app/                         # Next.js application
-│   └── ...
-├── helm/
-│   └── supportmind/                 # Helm chart
-├── k8s/                             # Kubernetes manifests
-├── scripts/                         # Development/deployment helpers
-├── docker-compose.yml
-└── README.md
+The backend Dockerfile uses Python 3.11 slim, installs dependencies from `requirements.txt`, copies the application, and runs Uvicorn on port `8000`.
+
+The development environment uses a shared Docker network for the API, Phoenix, Qdrant, and Neo4j. Ollama and MLflow may run on the Windows host and be accessed from containers through `host.docker.internal`.
+
+The exact dependency startup arrangement is defined by the repository's Compose and service configuration.
+
+### Kubernetes and Minikube
+
+The project includes Kubernetes configuration for the API, including a Deployment, Service, ConfigMap, and external secret configuration.
+
+Minikube is used for local Kubernetes deployment and validation. The current development setup can mount the raw dataset directory from Windows into the cluster; that local host mount is not a portable production storage solution.
+
+### Helm
+
+The Helm chart is maintained under `helm/supportmind`. It templates the API Deployment, Service, and configuration from chart values.
+
+Example commands from the repository root:
+
+```powershell
+helm lint .\helm\supportmind
+helm template supportmind .\helm\supportmind
+helm upgrade --install supportmind .\helm\supportmind -n supportmind --create-namespace
 ```
 
-Some model weights, raw datasets, and generated artifacts are intentionally not stored in Git. A fresh clone may therefore require separate artifact preparation before every ML-dependent capability can run.
+If an existing Kubernetes Deployment already owns the same resources, review the release and resource ownership before installing or adopting them. Do not blindly apply the example command over an existing deployment.
+
+### GitHub Actions
+
+The repository includes a GitHub Actions CI workflow covering frontend checks/build, backend Python syntax validation, and backend Docker image building.
+
+[View GitHub Actions runs](https://github.com/Daniel-mass/supportmind-ai/actions)
+
+CI verifies selected build checks. It is not, by itself, a production deployment pipeline. Existing frontend lint issues and the workflow's lint-step configuration should be reviewed separately.
 
 ---
 
-## Run Locally
+## Getting Started
 
 ### Prerequisites
 
-Install or prepare:
+Install the tools needed for the components you intend to run:
 
 - Git
 - Python 3.11
-- Node.js and npm compatible with the frontend dependencies
 - Conda or another Python environment manager
+- Node.js and npm
+- Docker Desktop
 - Ollama with the required local model
-- Access to Qdrant and Neo4j
-- The configured data files and model artifacts required by the selected features
+- Qdrant and Neo4j
+- MLflow and Phoenix for evaluation/observability features
 
-Docker is recommended for the configured backend services. Kubernetes and Helm are optional if you only want to explore local application development.
+Minikube, kubectl, and Helm are needed for the Kubernetes deployment path.
 
 ### 1. Clone the repository
 
@@ -490,75 +423,44 @@ git clone https://github.com/Daniel-mass/supportmind-ai.git
 cd supportmind-ai
 ```
 
-### 2. Prepare the backend environment
+### 2. Set up the backend environment
 
 ```powershell
 conda create -n supportmind python=3.11 -y
 conda activate supportmind
 
-cd backend
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
-Return to the repository root when running root-level commands:
-
-```powershell
-cd ..
-```
+Use the dependency file present in the checked-out revision. If the repository's current dependency layout differs, follow that layout rather than installing duplicate dependency sets.
 
 ### 3. Configure environment variables
 
-Create the appropriate local environment configuration using the variable names expected by the application.
+Create local environment configuration based on the variables required by the current backend settings and deployment configuration. Do not commit secrets, credentials, private datasets, or local `.env` files.
 
-Typical configuration includes:
+See [Configuration](#configuration).
 
-```dotenv
-OLLAMA_HOST=http://localhost:11434
-SUPPORTMIND_LLM_MODEL=qwen3:8b
-SUPPORTMIND_GRAPH_RAG_MODEL=qwen3:8b
+### 4. Start the backend
 
-QDRANT_URL=http://localhost:6333
-
-NEO4J_URI=bolt://localhost:7687
-NEO4J_USERNAME=neo4j
-NEO4J_PASSWORD=<your-local-password>
-NEO4J_DATABASE=neo4j
-
-MLFLOW_TRACKING_URI=http://127.0.0.1:5000
-```
-
-Additional variables may be required for data paths, embedding models, collections, and Phoenix. Use the application's configuration code and existing environment templates as the source of truth.
-
-**Never commit real credentials, `.env` files, local database files, or private datasets.**
-
-### 4. Start the local dependencies
-
-Start Ollama and ensure the required model is available:
+From the repository root:
 
 ```powershell
-ollama pull qwen3:8b
-ollama list
-```
-
-Start Qdrant and Neo4j using your configured local services or container setup. Confirm that their endpoints, credentials, database names, and collection configuration match the backend environment.
-
-### 5. Start the backend
-
-```powershell
-conda activate supportmind
 cd backend
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Check the API:
+Check health:
 
-- Health: `http://127.0.0.1:8000/api/v1/health`
-- Interactive API docs: `http://127.0.0.1:8000/docs`
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/health
+```
 
-### 6. Start the frontend
+Open the interactive API documentation at `http://127.0.0.1:8000/docs`.
 
-Open another PowerShell terminal:
+### 5. Set up the frontend
+
+In a separate PowerShell terminal:
 
 ```powershell
 cd frontend
@@ -568,185 +470,111 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Configure the frontend's API base URL using the environment variable expected by the current frontend API client. Ensure the backend is running and accessible.
+### 6. Start supporting services
 
-> **Setup note:** These are the main development commands. They do not automatically provision the required datasets, trained model weights, Qdrant collections, Neo4j graph contents, or evaluation results. Follow the relevant configuration and data-preparation code when setting up a clean environment.
+Start Qdrant, Neo4j, Ollama, Phoenix, and MLflow according to the configuration for the chosen execution mode. Ensure that the backend's URLs, credentials, model names, vector collection, and dataset paths match the services actually running.
 
----
-
-## Containerization and Deployment
-
-### Docker
-
-The backend uses a Python 3.11 slim image, installs dependencies from `requirements.txt`, copies the application source, and starts Uvicorn on port `8000`.
-
-Build and start the configured API service from the repository root:
-
-```powershell
-docker compose up -d --build supportmind-api
-```
-
-Inspect running containers and API logs:
-
-```powershell
-docker ps
-docker logs supportmind-api
-```
-
-The configured Docker environment connects to services such as Qdrant and Neo4j through the shared `supportmind-net` network. Ollama and MLflow have also been configured to run on the Windows host during local development.
-
-When a container needs to access a service on the Windows host, `host.docker.internal` may be required instead of `localhost`.
-
-### Kubernetes and Minikube
-
-The local Kubernetes setup includes:
-
-- A `supportmind` namespace.
-- A backend API Deployment.
-- A ClusterIP Service.
-- Configuration through a ConfigMap and secret references.
-- Health verification from within the running API pod.
-- A local image workflow for Minikube.
-
-The development setup uses local dataset access through a mounted host directory. That mount may require a separate running `minikube mount` process, so it is not equivalent to portable production storage.
-
-Useful commands:
-
-```powershell
-minikube status
-minikube kubectl -- get pods -n supportmind
-minikube kubectl -- get services -n supportmind
-minikube kubectl -- get deployments -n supportmind
-```
-
-### Helm
-
-The chart under `helm/supportmind` packages the Kubernetes resources and configurable deployment values.
-
-```powershell
-helm lint .\helm\supportmind
-helm template supportmind .\helm\supportmind
-helm status supportmind -n supportmind
-helm list -n supportmind
-```
-
-The recorded local installation used:
-
-```powershell
-helm upgrade --install supportmind .\helm\supportmind -n supportmind --take-ownership
-```
-
-Use `--take-ownership` only when intentionally adopting existing Kubernetes resources and after confirming the implications for the target cluster.
-
-**Deployment scope:** The documented deployment work targets local development and validation using Docker and Minikube. A production cloud deployment, managed database architecture, external connector deployment, autoscaling strategy, and production-grade secret/storage management should not be inferred from this setup.
+The complete AI workflow requires its corresponding models, data, and infrastructure. Starting FastAPI alone does not automatically initialize every dependency.
 
 ---
 
-## CI with GitHub Actions
+## Configuration
 
-The repository includes a GitHub Actions CI workflow.
+The following are representative configuration values from the local development setup. They are examples, not a substitute for the current settings or Helm values.
 
-The recorded workflow covers:
+| Variable | Purpose | Example |
+|---|---|---|
+| `OLLAMA_HOST` | Ollama endpoint | `http://host.docker.internal:11434` from a container |
+| `SUPPORTMIND_LLM_MODEL` | Support generation model | `qwen3:8b` |
+| `SUPPORTMIND_GRAPH_RAG_MODEL` | Graph-RAG model | `qwen3:8b` |
+| `QDRANT_URL` | Qdrant endpoint | `http://sharebot-qdrant:6333` on the shared Docker network |
+| `QDRANT_HOST` | Qdrant host | `sharebot-qdrant` |
+| `NEO4J_URI` | Neo4j connection | `bolt://neo4j-sentinel:7687` on the shared Docker network |
+| `NEO4J_USERNAME` | Neo4j username | Configured locally |
+| `NEO4J_PASSWORD` | Neo4j password | Supplied through a secret |
+| `NEO4J_DATABASE` | Neo4j database | `neo4j` |
+| `PHOENIX_COLLECTOR_ENDPOINT` | Trace collector | `http://phoenix:6006/v1/traces` |
+| `MLFLOW_TRACKING_URI` | MLflow server | `http://host.docker.internal:5000` from a container |
 
-- Frontend lint/build checks.
-- Backend Python syntax compilation.
-- Backend Docker image build.
+Other settings may be required for dataset locations, embedding models, collection names, artifact paths, and evaluation results.
 
-The repository's frontend lint step has historically allowed the workflow to continue despite existing lint errors. A passing workflow therefore does not necessarily mean that every lint issue is resolved or that every backend integration and end-to-end test has run in CI.
+**Networking note:** `host.docker.internal` is intended for container-to-host access in the local Docker Desktop environment. Container-to-container URLs should use the appropriate service/container network names. Kubernetes networking and mounted data paths must be configured separately.
 
-CI currently demonstrates automated code and build checks. It should not be described as a complete continuous-delivery pipeline that deploys to production.
-
-Review the latest workflow and run results in the repository's **Actions** tab for the current status.
+Never expose database passwords, tokens, API keys, or customer information in source control.
 
 ---
 
-## Datasets and Knowledge Sources
+## Data and Model Artifacts
 
-SupportMind uses separate data sources for model development, operational analytics, and retrieval.
+SupportMind uses task-specific datasets and artifacts.
 
-| Dataset/source | Primary use |
+| Dataset or source | Purpose |
 |---|---|
-| Customer Support Tickets Dataset | Semantic similarity and issue-topic discovery |
-| Customer Support on Twitter | Conversation-complexity task development |
-| IT Helpdesk Synthetic Tickets | Ticket-category classification |
-| Help Desk Tickets | Priority modelling and operational workflow intelligence |
-| NovaCare knowledge-base documents | Retrieval and support-assistance demonstrations |
-| Enron Email Dataset | Potential email-intelligence development source; live connector status is separate |
+| Customer Support Tickets Dataset | Semantic similarity and BERTopic issue discovery. |
+| IT Helpdesk Synthetic Tickets | Ticket-category classification. |
+| Help Desk Tickets and change history | Priority modelling and operational/workflow intelligence. |
+| Customer Support on Twitter | Conversation-complexity task development. |
+| NovaCare synthetic knowledge base | Knowledge retrieval and support-assistance demonstrations. |
+| Enron Email Dataset | Potential development/testing source for email-oriented workflows. |
 
-The ingestion code supports multiple file formats. That does **not** mean Gmail, Outlook, Zendesk, Freshdesk, Jira Service Management, Confluence, Notion, Slack, and Microsoft Teams have all been integrated as live, authenticated connectors.
+Raw datasets are not required to be committed to GitHub. Supply them locally according to the configured paths and any applicable dataset licences.
 
-Third-party connector support should be claimed only after the corresponding integration has been implemented and validated.
+Some trained model artifacts in the development environment exceeded GitHub's 100 MB file limit and were excluded from version control. A fresh clone may therefore require separately obtaining or regenerating particular artifacts before every ML feature can run.
+
+The BERTopic experiment also relies on the matching embedding model at inference time because its training embeddings were supplied separately.
 
 ---
 
-## Engineering Decisions
+## Engineering Principles
 
-### Data-driven modelling instead of feature inflation
+SupportMind follows several deliberate design decisions:
 
-The initial roadmap considered a wider set of NLP tasks. The implemented scope was narrowed to tasks supported by the available data and useful to the platform. Unsupported supervised tasks were removed rather than represented as completed.
-
-### Separate retrieval from generation
-
-Retrieval services locate evidence; Graph-RAG combines relevant graph and vector context; the generation layer composes an answer. This separation supports independent testing and troubleshooting.
-
-### Preserve evidence provenance
-
-Evidence identifiers, source metadata, and validation help make generated responses more traceable. Grounding validation is a safeguard, not a mathematical guarantee that hallucinations are impossible.
-
-### Separate operational analytics from LLM reasoning
-
-Ticket and workflow measurements are derived through structured analytics where possible. This avoids asking an LLM to invent counts, waiting times, or workflow statistics.
-
-### Use the right tool for each operational concern
-
-- Neo4j models graph relationships.
-- Qdrant stores vectors for retrieval.
-- AutoGen coordinates agents.
-- Phoenix traces agent execution.
-- DeepEval evaluates LLM/RAG outputs.
-- MLflow tracks experiments and evaluation runs.
-
-### Treat reproducibility as an engineering requirement
-
-Datasets, model weights, local environment configuration, database state, and evaluation artifacts can all affect results. A repository clone alone may not reproduce every local development result unless the necessary artifacts and configuration are available.
+- **Evidence before generation:** retrieve and rank evidence before composing support responses.
+- **Provenance preservation:** retain source information so generated answers can be inspected.
+- **Structured contracts:** use Pydantic schemas and canonical intelligence models between services.
+- **Separation of responsibilities:** keep retrieval, graph storage, operational analytics, agent orchestration, evaluation, and frontend presentation distinct.
+- **Data-driven modelling:** implement tasks supported by available data instead of claiming unsupported capabilities.
+- **Deterministic operational analytics:** calculate workflow and organizational metrics independently of LLM-generated explanations.
+- **Local-first inference option:** use Ollama for local model execution in the development setup.
+- **Observability:** use Phoenix for execution tracing and MLflow for experiment/evaluation tracking.
+- **Reproducible deployment:** use container images, Kubernetes manifests, and Helm configuration where appropriate.
 
 ---
 
 ## Limitations and Scope
 
-SupportMind is a portfolio-grade AI platform with a local containerized deployment workflow. The following boundaries are important:
+SupportMind is a portfolio-grade engineering project with production-oriented architecture; it should not be confused with a fully managed enterprise SaaS deployment.
 
-- The ticket-category and priority models were developed on limited or synthetic data; their recorded metrics do not establish general enterprise performance.
-- Priority performance is weaker on rare classes, so predictions should not be treated as definitive.
-- BERTopic produces topic clusters and outliers, not guaranteed root-cause diagnoses.
-- Sentiment is a supporting signal, not a claim that a dedicated, production-trained sentiment model exists for every source.
-- Intent classification, NER, ML-based urgency prediction, and ML-based escalation prediction were removed from the supported ML scope.
-- No live third-party email, ticketing, or collaboration connector should be assumed without separate implementation evidence.
-- Evidence validation reduces risk but does not guarantee that all generated answers are correct.
-- Local Minikube deployment is not equivalent to production cloud deployment.
-- Model weights and local datasets may be excluded from Git and may need to be prepared separately.
-- Historical test reports should not be interpreted as a fresh, complete test-suite pass.
-
----
-
-## Future Directions
-
-Potential extensions, subject to validation and prioritization, include:
-
-- More comprehensive automated regression and end-to-end tests.
-- Reproducible model-artifact preparation and retrieval benchmarks.
-- Stronger evaluation datasets and minority-class model analysis.
-- Production-ready external connectors with authentication, incremental ingestion, deduplication, and monitoring.
-- Cloud Kubernetes deployment and managed persistence.
-- Additional security controls, access management, resource monitoring, and alerting.
-- A formal CD workflow after deployment and rollback requirements are defined.
-
-These are future directions, not claims about currently implemented functionality.
+- Gmail, Outlook, Zendesk, Freshdesk, Jira Service Management, Confluence, Notion, Slack, and Teams are examples of potential source integrations, **not claims of completed live connectors**.
+- The current data ingestion implementation should not be described as a continuous enterprise connector platform.
+- Intent classification, NER, ML-based urgency detection, and ML-based escalation prediction were removed from the supported ML scope.
+- Topic clusters are exploratory signals and do not establish causal root causes.
+- Generated resolution suggestions require appropriate validation and human oversight in consequential support workflows.
+- Grounding and citation validation reduce unsupported answers but cannot eliminate all hallucinations.
+- Local Minikube deployment is a development environment, not evidence of a production cloud deployment.
+- CI does not imply that a CD pipeline, automated cloud rollout, Prometheus/Grafana monitoring, alerting, or production SLA guarantees are in place.
+- Model and dataset availability depends on local configuration and whether large artifacts have been separately obtained.
 
 ---
 
-## Project Repository
+## Roadmap
 
-**GitHub:** [Daniel-mass/supportmind-ai](https://github.com/Daniel-mass/supportmind-ai)
+Potential next steps, subject to validation against the current implementation:
 
-SupportMind AI brings together NLP/ML, hybrid retrieval, knowledge graphs, Graph-RAG, agentic workflows, structured operational intelligence, evaluation, observability, and modern application deployment in one integrated customer-support intelligence platform.
+- Reproducible model-artifact distribution and setup checks.
+- Broader automated backend and frontend test coverage.
+- End-to-end deployment and smoke-test automation.
+- More robust ingestion adapters for real enterprise source systems.
+- Production-grade secret management and persistent infrastructure.
+- Additional service metrics, alerting, and operational monitoring.
+- Deployment to a managed Kubernetes environment when required.
+
+---
+
+## License
+
+Add the appropriate license file before distributing or reusing this project. Verify the licences of datasets, model weights, and dependencies independently.
+
+---
+
+**SupportMind AI** — connecting customer-support evidence, AI-assisted resolution, and organizational intelligence in one platform.
